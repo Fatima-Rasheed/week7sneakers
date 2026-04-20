@@ -1,18 +1,23 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app.module");
+const platform_express_1 = require("@nestjs/platform-express");
+const express_1 = __importDefault(require("express"));
+const expressApp = (0, express_1.default)();
 async function bootstrap() {
-    const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    const app = await core_1.NestFactory.create(app_module_1.AppModule, new platform_express_1.ExpressAdapter(expressApp));
     app.enableCors({
-        origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+        origin: [
+            process.env.FRONTEND_URL
+        ],
         methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization'],
-        credentials: true,
     });
     const port = process.env.PORT ?? 4000;
     await app.listen(port);
-    console.log(`Backend running on http://localhost:${port}`);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

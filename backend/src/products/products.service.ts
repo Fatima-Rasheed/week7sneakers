@@ -26,11 +26,9 @@ export class ProductsService {
   private client: GraphQLClient;
 
   constructor(private configService: ConfigService) {
-    // Ensure this URL is the "Content API" endpoint from Hygraph
     const url = this.configService.get<string>('HYGRAPH_URL') ?? '';
+    const token = this.configService.get<string>('HYGRAPH_TOKEN');
 
-    // Since Public Permissions are enabled in Hygraph, 
-    // we do not pass a headers object or Bearer token.
     this.client = new GraphQLClient(url);
   }
 

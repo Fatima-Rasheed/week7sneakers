@@ -21,6 +21,7 @@ let ProductsService = ProductsService_1 = class ProductsService {
     constructor(configService) {
         this.configService = configService;
         const url = this.configService.get('HYGRAPH_URL') ?? '';
+        const token = this.configService.get('HYGRAPH_TOKEN');
         this.client = new graphql_request_1.GraphQLClient(url);
     }
     async findAll() {
