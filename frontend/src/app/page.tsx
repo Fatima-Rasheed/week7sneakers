@@ -15,6 +15,7 @@ import { useGetProductsQuery } from '@/services/api';
 export default function HomePage() {
   const { data: products, isLoading, error } = useGetProductsQuery();
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('ALL');
 
   const allProducts = products ?? [];
 
@@ -37,16 +38,21 @@ export default function HomePage() {
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.category?.toLowerCase().includes(searchQuery.toLowerCase())
     )
-    : allProducts;
+    : activeCategory === 'ALL'
+    ? allProducts
+    : allProducts.filter(
+        (p) => p.category?.toLowerCase() === activeCategory.toLowerCase()
+      );
 
   const isSearching = searchQuery.trim().length > 0;
+  const isFiltering = !isSearching && activeCategory !== 'ALL';
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'white' }}>
-      <Navbar onSearch={setSearchQuery} />
+      <Navbar onSearch={setSearchQuery} activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
 
       {/* Show search results when searching */}
-      {isSearching ? (
+      {isSearching || isFiltering ? (
         <Box sx={{ py: 4, px: { xs: 2, md: 4 }, maxWidth: 1400, mx: 'auto' }}>
           <Typography
             sx={{
@@ -56,7 +62,7 @@ export default function HomePage() {
               mb: 1,
             }}
           >
-            Results for &ldquo;{searchQuery}&rdquo;
+            {isSearching ? <>Results for &ldquo;{searchQuery}&rdquo;</> : activeCategory.toUpperCase()}
           </Typography>
           <Typography sx={{ color: '#999', fontSize: '0.9rem', mb: 3 }}>
             {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found

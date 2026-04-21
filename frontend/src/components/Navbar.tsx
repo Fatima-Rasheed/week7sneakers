@@ -26,9 +26,11 @@ import { useGetCartQuery } from '@/services/api';
 
 interface NavbarProps {
   onSearch?: (query: string) => void;
+  activeCategory?: string;
+  onCategoryChange?: (category: string) => void;
 }
 
-export default function Navbar({ onSearch }: NavbarProps) {
+export default function Navbar({ onSearch, activeCategory = 'ALL', onCategoryChange }: NavbarProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,12 +56,19 @@ export default function Navbar({ onSearch }: NavbarProps) {
   };
 
   const navItems = [
-    { label: 'WOMAN', fontWeight: 400 },
-    { label: 'MEN', fontWeight: 400 },
-    { label: 'ALL', fontWeight: 700 },
+    { label: 'WOMAN', category: 'woman' },
+    { label: 'MEN', category: 'men' },
+    { label: 'ALL', category: 'ALL' },
   ];
 
-  const drawerItems = ['ALL', 'WOMAN', 'MEN', 'WORKOUT', 'RUN', 'FOOTBALL'];
+  const drawerItems = [
+    { label: 'ALL', category: 'ALL' },
+    { label: 'WOMAN', category: 'woman' },
+    { label: 'MEN', category: 'men' },
+    { label: 'WORKOUT', category: 'workout' },
+    { label: 'RUN', category: 'run' },
+    { label: 'FOOTBALL', category: 'football' },
+  ];
 
   return (
     <>
@@ -106,6 +115,7 @@ export default function Navbar({ onSearch }: NavbarProps) {
               {navItems.map((item) => (
                 <Box
                   key={item.label}
+                  onClick={() => onCategoryChange?.(item.category)}
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
@@ -117,13 +127,13 @@ export default function Navbar({ onSearch }: NavbarProps) {
                   <Typography
                     sx={{
                       fontFamily: 'Montserrat, sans-serif',
-                      fontWeight: item.fontWeight,
+                      fontWeight: activeCategory === item.category ? 700 : 400,
                       fontSize: '18px',
                       lineHeight: '100%',
                       textAlign: 'center',
                       color: '#000',
                       borderBottom:
-                        item.label === 'ALL'
+                        activeCategory === item.category
                           ? '2px solid black'
                           : 'none',
                       pb: '4px',
@@ -304,24 +314,27 @@ export default function Navbar({ onSearch }: NavbarProps) {
         </Box>
 
         <List sx={{ pt: 1 }}>
-          {drawerItems.map((link) => (
+          {drawerItems.map((item) => (
             <ListItem
-              key={link}
-              onClick={() => setDrawerOpen(false)}
+              key={item.label}
+              onClick={() => {
+                onCategoryChange?.(item.category);
+                setDrawerOpen(false);
+              }}
               sx={{ py: 1.5, cursor: 'pointer', '&:hover': { bgcolor: '#f5f5f5' } }}
             >
               <ListItemText
-                primary={link}
+                primary={item.label}
                 slotProps={{
                   primary: {
                     sx: {
                       fontFamily: 'Montserrat, sans-serif',
-                      fontWeight: link === 'ALL' ? 700 : 400,
+                      fontWeight: activeCategory === item.category ? 700 : 400,
                       fontSize: '1rem',
                       letterSpacing: '0.05em',
-                      borderBottom: link === 'ALL' ? '2px solid black' : 'none',
+                      borderBottom: activeCategory === item.category ? '2px solid black' : 'none',
                       display: 'inline-block',
-                      pb: link === 'ALL' ? '2px' : 0,
+                      pb: activeCategory === item.category ? '2px' : 0,
                     },
                   },
                 }}
