@@ -17,11 +17,9 @@ import {
   InputBase,
   Collapse,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import CloseIcon from '@mui/icons-material/Close';
-import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
-import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
+
 import { useGetCartQuery } from '@/services/api';
 
 interface NavbarProps {
@@ -30,7 +28,11 @@ interface NavbarProps {
   onCategoryChange?: (category: string) => void;
 }
 
-export default function Navbar({ onSearch, activeCategory = 'ALL', onCategoryChange }: NavbarProps) {
+export default function Navbar({
+  onSearch,
+  activeCategory = 'ALL',
+  onCategoryChange,
+}: NavbarProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,6 +40,13 @@ export default function Navbar({ onSearch, activeCategory = 'ALL', onCategoryCha
   const { data: cart } = useGetCartQuery();
   const cartCount =
     cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+
+  // ✅ ICON IMAGES — kept exactly as before for search, user, cart
+  const icons = {
+    search: '/поиск.png ',
+    user: '/войти.png',
+    cart: '/корзина.png',
+  };
 
   const handleSearchToggle = () => {
     if (searchOpen) {
@@ -91,16 +100,17 @@ export default function Navbar({ onSearch, activeCategory = 'ALL', onCategoryCha
               px: { xs: 2, md: 4 },
             }}
           >
-            {/* MOBILE MENU */}
+            {/* MOBILE MENU — MUI MenuIcon */}
             <IconButton
               sx={{
                 display: { xs: 'flex', md: 'none' },
                 position: 'absolute',
                 left: 16,
+                color: 'black',
               }}
               onClick={() => setDrawerOpen(true)}
             >
-              <MenuIcon />
+              <MenuIcon sx={{ fontSize: 26 }} />
             </IconButton>
 
             {/* LEFT NAV */}
@@ -127,7 +137,8 @@ export default function Navbar({ onSearch, activeCategory = 'ALL', onCategoryCha
                   <Typography
                     sx={{
                       fontFamily: 'Montserrat, sans-serif',
-                      fontWeight: activeCategory === item.category ? 700 : 400,
+                      fontWeight:
+                        activeCategory === item.category ? 700 : 400,
                       fontSize: '18px',
                       lineHeight: '100%',
                       textAlign: 'center',
@@ -194,48 +205,28 @@ export default function Navbar({ onSearch, activeCategory = 'ALL', onCategoryCha
                 ml: 'auto',
               }}
             >
-              {/* PROFILE ICON */}
-              <Box
-                sx={{
-                  display: { xs: 'none', md: 'flex' },
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
+              {/* USER — hidden on mobile, shown in drawer instead */}
+              <IconButton sx={{ p: 0, display: { xs: 'none', md: 'flex' } }}>
+                <img src={icons.user} alt="user" width={22} height={22} />
+              </IconButton>
+
+              {/* SEARCH — hidden on mobile (moved to drawer) */}
+              <IconButton onClick={handleSearchToggle} sx={{ p: 0, display: { xs: 'none', md: 'flex' } }}>
+                {searchOpen ? (
+                  <CloseIcon sx={{ fontSize: 22, color: 'black' }} />
+                ) : (
+                  <img src={icons.search} alt="search" width={22} height={22} />
+                )}
+              </IconButton>
+
+              {/* CART — original image icon */}
+              <Link href="/cart">
                 <IconButton sx={{ p: 0 }}>
-                  <PersonOutlinedIcon />
+                  <Badge badgeContent={cartCount} color="error">
+                    <img src={icons.cart} alt="cart" width={22} height={22} />
+                  </Badge>
                 </IconButton>
-              </Box>
-
-              {/* SEARCH ICON */}
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <IconButton onClick={handleSearchToggle} sx={{ p: 0 }}>
-                  {searchOpen ? <CloseIcon /> : <SearchIcon />}
-                </IconButton>
-              </Box>
-
-              {/* CART ICON */}
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Link href="/cart">
-                  <IconButton sx={{ p: 0 }}>
-                    <Badge badgeContent={cartCount} color="error">
-                      <ShoppingBagOutlinedIcon />
-                    </Badge>
-                  </IconButton>
-                </Link>
-              </Box>
+              </Link>
             </Box>
           </Toolbar>
 
@@ -251,7 +242,7 @@ export default function Navbar({ onSearch, activeCategory = 'ALL', onCategoryCha
                 borderTop: '1px solid #f0f0f0',
               }}
             >
-              <SearchIcon sx={{ color: '#999', fontSize: '1.2rem' }} />
+              <img src={icons.search} alt="search" width={18} height={18} />
               <InputBase
                 autoFocus
                 fullWidth
@@ -271,7 +262,8 @@ export default function Navbar({ onSearch, activeCategory = 'ALL', onCategoryCha
                     onSearch?.('');
                   }}
                 >
-                  <CloseIcon fontSize="small" />
+                  {/* MUI CloseIcon for clearing search input */}
+                  <CloseIcon sx={{ fontSize: 18, color: 'black' }} />
                 </IconButton>
               )}
             </Box>
@@ -284,34 +276,35 @@ export default function Navbar({ onSearch, activeCategory = 'ALL', onCategoryCha
         anchor="left"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        slotProps={{ paper: { sx: { width: 280, display: 'flex', flexDirection: 'column' } } }}
+        slotProps={{
+          paper: {
+            sx: {
+              width: 280,
+              display: 'flex',
+              flexDirection: 'column',
+            },
+          },
+        }}
       >
-        <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography sx={{ fontWeight: 900, fontSize: '1.1rem', letterSpacing: '0.05em' }}>
+        <Box
+          sx={{
+            p: 2,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Typography sx={{ fontWeight: 900, fontSize: '1.1rem' }}>
             YOUR <strong>SNEAKER</strong>
           </Typography>
-          <IconButton onClick={() => setDrawerOpen(false)}>
-            <CloseIcon />
+
+          {/* DRAWER CLOSE — MUI CloseIcon */}
+          <IconButton onClick={() => setDrawerOpen(false)} sx={{ color: 'black' }}>
+            <CloseIcon sx={{ fontSize: 22 }} />
           </IconButton>
         </Box>
 
         <Divider />
-
-        {/* Search row */}
-        <Box sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'center', gap: 1, borderBottom: '1px solid #f0f0f0' }}>
-          <SearchIcon sx={{ color: '#999', fontSize: '1.1rem' }} />
-          <Typography sx={{ fontFamily: 'Montserrat, sans-serif', fontSize: '0.9rem', color: '#999' }}>
-            SEARCH
-          </Typography>
-        </Box>
-
-        {/* Login row */}
-        <Box sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'center', gap: 1, borderBottom: '1px solid #f0f0f0' }}>
-          <PersonOutlinedIcon sx={{ color: '#999', fontSize: '1.1rem' }} />
-          <Typography sx={{ fontFamily: 'Montserrat, sans-serif', fontSize: '0.9rem', color: '#999' }}>
-            LOGIN
-          </Typography>
-        </Box>
 
         <List sx={{ pt: 1 }}>
           {drawerItems.map((item) => (
@@ -321,7 +314,11 @@ export default function Navbar({ onSearch, activeCategory = 'ALL', onCategoryCha
                 onCategoryChange?.(item.category);
                 setDrawerOpen(false);
               }}
-              sx={{ py: 1.5, cursor: 'pointer', '&:hover': { bgcolor: '#f5f5f5' } }}
+              sx={{
+                py: 1.5,
+                cursor: 'pointer',
+                '&:hover': { bgcolor: '#f5f5f5' },
+              }}
             >
               <ListItemText
                 primary={item.label}
@@ -329,10 +326,14 @@ export default function Navbar({ onSearch, activeCategory = 'ALL', onCategoryCha
                   primary: {
                     sx: {
                       fontFamily: 'Montserrat, sans-serif',
-                      fontWeight: activeCategory === item.category ? 700 : 400,
+                      fontWeight:
+                        activeCategory === item.category ? 700 : 400,
                       fontSize: '1rem',
                       letterSpacing: '0.05em',
-                      borderBottom: activeCategory === item.category ? '2px solid black' : 'none',
+                      borderBottom:
+                        activeCategory === item.category
+                          ? '2px solid black'
+                          : 'none',
                       display: 'inline-block',
                       pb: activeCategory === item.category ? '2px' : 0,
                     },
@@ -343,15 +344,45 @@ export default function Navbar({ onSearch, activeCategory = 'ALL', onCategoryCha
           ))}
         </List>
 
-        {/* Nike swoosh at bottom of drawer */}
-        <Box sx={{ mt: 'auto', p: 3, display: 'flex', justifyContent: 'flex-end' }}>
-          <Box
-            component="img"
-            src="/Vector (25).png"
-            alt="Nike"
-            sx={{ width: 60, height: 'auto', objectFit: 'contain', filter: 'invert(1)' }}
+        <Divider />
+
+        {/* SEARCH in drawer — mobile only */}
+        <ListItem sx={{ py: 1.5, cursor: 'pointer', '&:hover': { bgcolor: '#f5f5f5' } }} onClick={() => { setDrawerOpen(false); handleSearchToggle(); }}>
+          <img src={icons.search} alt="search" width={22} height={22} style={{ marginRight: 12 }} />
+          <ListItemText
+            primary="Search"
+            slotProps={{
+              primary: {
+                sx: {
+                  fontFamily: 'Montserrat, sans-serif',
+                  fontWeight: 400,
+                  fontSize: '1rem',
+                  letterSpacing: '0.05em',
+                },
+              },
+            }}
           />
-        </Box>
+        </ListItem>
+
+        <Divider />
+
+        {/* USER ICON in drawer — mobile only */}
+        <ListItem sx={{ py: 1.5, cursor: 'pointer', '&:hover': { bgcolor: '#f5f5f5' } }}>
+          <img src={icons.user} alt="user" width={22} height={22} style={{ marginRight: 12 }} />
+          <ListItemText
+            primary="Sign In"
+            slotProps={{
+              primary: {
+                sx: {
+                  fontFamily: 'Montserrat, sans-serif',
+                  fontWeight: 400,
+                  fontSize: '1rem',
+                  letterSpacing: '0.05em',
+                },
+              },
+            }}
+          />
+        </ListItem>
       </Drawer>
     </>
   );
